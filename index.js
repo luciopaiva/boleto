@@ -7,8 +7,8 @@ class NumericCode {
         this.numericCodeElement = document.getElementById(elementId);
         document.addEventListener('keydown', this.onKeyDown.bind(this));
 
-        this.code = '';
         this.allowedKeys = new Set('0,1,2,3,4,5,6,7,8,9,Backspace'.split(','));
+        this.setCode('');
     }
 
     /**
@@ -56,6 +56,14 @@ class NumericCode {
             this.code += key;
         }
 
+        this.setCode(this.code);
+    }
+
+    /**
+     * @param {string} code - numeric code without mask
+     */
+    setCode(code) {
+        this.code = code;
         this.numericCodeElement.innerText = this.getCodeWithMask();
     }
 }
@@ -66,7 +74,8 @@ NumericCode.CODE_MASK = 'XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X
 class Boleto {
 
     constructor () {
-        new NumericCode('numeric-code');
+        this.numericCode = new NumericCode('numeric-code');
+        this.numericCode.setCode('846700000009699001090116033141666515101001037833');
     }
 }
 
