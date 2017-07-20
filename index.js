@@ -4,6 +4,7 @@
 class NumericCode {
 
     constructor (elementId) {
+        this.isCodeValid = false;
         this.numericCodeElement = document.getElementById(elementId);
         document.addEventListener('keydown', this.onKeyDown.bind(this));
 
@@ -64,7 +65,41 @@ class NumericCode {
      */
     setCode(code) {
         this.code = code;
+        this.validateCode();
         this.numericCodeElement.innerText = this.getCodeWithMask();
+    }
+
+    validateCode() {
+        // ToDo validate code
+        this.isCodeValid = true;
+        return this.isCodeValid;
+    }
+
+    analyze() {
+        if (!this.isCodeValid) {
+            return null;
+        }
+
+        // get rid of validation digits
+        const strippedCode =
+            this.code.substr(0, 11) +
+            this.code.substr(12, 11) +
+            this.code.substr(24, 11) +
+            this.code.substr(36, 11);
+
+        const product = strippedCode[0];  // should be always "8"
+        const segment = strippedCode[1];
+        const valueType = strippedCode[2];
+        const errorCheckDigit = strippedCode[3];
+        const value = strippedCode.substring(4, 15);
+
+        const companyId = strippedCode.substring(15, 19);
+        const freeField = strippedCode.substring(19, 44);
+
+        // const cnpj = this.code.substring(15, 23);
+        // const freeField = this.code.substring(23, 44);
+
+        return { product, segment, valueType, errorCheckDigit, value, companyId, freeField };
     }
 }
 
@@ -75,7 +110,30 @@ class Boleto {
 
     constructor () {
         this.numericCode = new NumericCode('numeric-code');
-        this.numericCode.setCode('846700000009699001090116033141666515101001037833');
+
+        this.sampleButton = document.getElementById('button-sample');
+        this.sampleButton.addEventListener('click', () => this.loadSample());
+    }
+
+    pause() {
+        return new Promise(resolve => setTimeout(resolve, 5));
+    }
+
+    async loadSample() {
+        const sample = '846700000009699001090116033141666515101001037833';
+        for (let i = 1; i < sample.length; i++) {
+            this.numericCode.setCode(sample.slice(0, i));
+            await this.pause();
+        }
+        this.numericCode.setCode(sample);
+        const obj = this.numericCode.analyze();
+        console.info(obj.product);
+        console.info(obj.segment);
+        console.info(obj.valueType);
+        console.info(obj.errorCheckDigit);
+        console.info(obj.value);
+        console.info(obj.companyId);
+        console.info(obj.freeField);
     }
 }
 

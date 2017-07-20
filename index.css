@@ -7,8 +7,18 @@ body {
         color: transparent;
     }
     50% {
-        color: #7fa2f7;
+        color: #337ab7;
     }
+}
+
+.page-header h1 {
+    float: left;
+    margin-top: 0;
+}
+
+.page-header .flag {
+    width: 42px;
+    float: right;
 }
 
 .numeric-code-container {

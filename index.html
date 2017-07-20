@@ -12,15 +12,47 @@
 
 <div class="container">
     <div class="row">
-        <h1>Boleto</h1>
+        <div class="col-md-12">
+            <div class="page-header clearfix">
+                <h1>Analisador de Boletos de Convênio</h1>
+                <img class="flag" src="brasil.svg" alt="Brazilian flag" title="This page is in brazilian portuguese">
+            </div>
+        </div>
     </div>
 
     <div class="row">
         <div class="col-md-12">
+            <p>Digite o código de barras a ser analisado ou
+                <button id="button-sample" class="btn btn-sm btn-primary">clique aqui</button> para carregar um exemplo.
+            </p>
             <div class="numeric-code-container">
                 <span id="numeric-mask">XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X</span>
                 <span id="numeric-code"></span><span class="blinking-cursor">▇</span>
             </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <hr>
+            <p class="text-right small">Made by <a href="http://www.luciopaiva.com">Lucio Paiva</a> in July 2017.</p>
         </div>
     </div>
 </div>

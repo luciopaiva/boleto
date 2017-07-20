@@ -1,0 +1,3 @@
+- hide caret if code is complete
+- show green/red symbol according to code validity
+- add clear button (trash icon)
