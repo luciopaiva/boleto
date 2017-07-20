@@ -45,6 +45,25 @@
     </div>
 
     <div class="row">
+        <div id="result-container" class="col-md-12">
+            <div id="result-data" class="hidden">
+                <h2>Resultado da análise:</h2>
+                <ul>
+                    <li>O código é <span class="code-field" id="code-validity"></span></li>
+                    <li>O boleto é de uma empresa/órgão do setor <span class="code-field" id="code-company-segment"></span></li>
+                    <li>O boleto cobra em reais</li>
+                    <li>O dígito verificador é calculado pelo método do módulo
+                        <span class="code-field" id="code-error-verification"></span></li>
+                    <li>O dígito verificador é <span class="code-field" id="code-verification-digit"></span></li>
+                    <li>O valor é de R$ <span class="code-field" id="code-value"></span></li>
+                    <li>O código da empresa é <span class="code-field" id="code-company-id"></span></li>
+                    <li>Campo livre: <span class="code-field" id="code-free-field"></span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-12">
             <hr>
             <p class="text-right small">Made by <a href="http://www.luciopaiva.com">Lucio Paiva</a> in July 2017.</p>

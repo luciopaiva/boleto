@@ -50,6 +50,10 @@
     animation: 1s blink step-end infinite;
 }
 
+.code-field {
+    font-weight: bold;
+}
+
 #numeric-code-and-cursor-container, #numeric-mask {
     position: absolute;
     top: 4px;
@@ -67,4 +71,9 @@
 #numeric-mask {
     color: lightgray;
     z-index: 2;
+}
+
+#result-container {
+    margin-top: 10px;
+    height: 260px;
 }

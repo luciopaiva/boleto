@@ -1,3 +1,4 @@
+- validate code
 - hide caret if code is complete
 - show green/red symbol according to code validity
-- add clear button (trash icon)
+- highlight parts of the code according to fields

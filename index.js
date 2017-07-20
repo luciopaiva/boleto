@@ -7,13 +7,17 @@ class NumericCodeComponent {
         this.numericCodeElement = document.getElementById(inputElementId);
         this.clearButtonElement = document.getElementById(clearButtonElementId);
 
-        this.isCodeValid = false;
+        this.isCodeComplete = false;
         document.addEventListener('keydown', this.onKeyDown.bind(this));
 
         this.clearButtonElement.addEventListener('click', () => this.setCode(''));
 
         this.allowedKeys = new Set('0,1,2,3,4,5,6,7,8,9,Backspace'.split(','));
         this.setCode('');
+    }
+
+    setCodeChangeCallback(onCodeChangedCallback) {
+        this.onCodeChangedCallback = onCodeChangedCallback;
     }
 
     /**
@@ -55,8 +59,10 @@ class NumericCodeComponent {
         if (key === 'Backspace') {
             if (this.code.length > 0) {
                 this.code = this.code.substr(0, this.code.length - 1);
+            } else {
+                // otherwise discard Backspace
+                return;
             }
-            // otherwise discard Backspace
         } else if (this.code.length < NumericCodeComponent.CODE_SIZE_IN_DIGITS) {
             this.code += key;
         }
@@ -69,18 +75,18 @@ class NumericCodeComponent {
      */
     setCode(code) {
         this.code = code;
-        this.validateCode();
+        this.isComplete();
         this.numericCodeElement.innerText = this.getCodeWithMask();
+        if (this.onCodeChangedCallback) this.onCodeChangedCallback();
     }
 
     getCode() {
         return this.code;
     }
 
-    validateCode() {
-        // ToDo validate code
-        this.isCodeValid = true;
-        return this.isCodeValid;
+    isComplete() {
+        this.isCodeComplete = this.code.length === NumericCodeComponent.CODE_SIZE_IN_DIGITS;
+        return this.isCodeComplete;
     }
 }
 
@@ -99,28 +105,93 @@ class CodeInformation {
             code.substr(36, 11);
 
         const product = strippedCode[0];  // should be always "8"
-        const segment = strippedCode[1];
+        const segmentDigit = strippedCode[1];
+        const segment = CodeInformation.companySegmentById.get(segmentDigit);
         const valueType = strippedCode[2];
         const errorCheckDigit = strippedCode[3];
-        const value = strippedCode.substring(4, 15);
+        const value = (parseInt(strippedCode.substring(4, 15), 10) / 100).toFixed(2).replace('.', ',');
 
         const companyId = strippedCode.substring(15, 19);
+        const companyName = CodeInformation.companyNameById.get(companyId);
         const freeField = strippedCode.substring(19, 44);
 
         // const cnpj = this.code.substring(15, 23);
         // const freeField = this.code.substring(23, 44);
 
-        return { product, segment, valueType, errorCheckDigit, value, companyId, freeField };
+        return { product, segment, segmentDigit, valueType, errorCheckDigit, value, companyId, companyName, freeField };
     }
 }
+
+CodeInformation.companySegmentById = new Map([
+    ['1', 'de prefeituras'],
+    ['2', 'de saneamento'],
+    ['3', 'de energia elétrica e gás'],
+    ['4', 'de telecomunicações'],
+    ['5', 'governamental'],
+    ['6', 'geral'],
+    ['7', 'de multas de trânsito'],
+    ['8', '--CÓDIGO RESERVADO--'],
+]);
+
+CodeInformation.companyNameById = new Map([
+    ['0109', 'Live TIM'],
+    ['0048', 'Vivo'],
+    ['0056', 'CEG'],
+    ['0053', 'Light'],
+]);
 
 class Boleto {
 
     constructor () {
         this.numericCodeComponent = new NumericCodeComponent('numeric-code', 'clear-button');
+        this.numericCodeComponent.setCodeChangeCallback(() => this.onCodeChanged());
+        this.resultDataElement = document.getElementById('result-data');
+
+        this.allResultFields = document.querySelectorAll('#result-data li');
+        this.fieldCodeValidity = document.getElementById('code-validity');
+        this.fieldCodeCompanySegment = document.getElementById('code-company-segment');
+        this.fieldCodeErrorVerification = document.getElementById('code-error-verification');
+        this.fieldCodeVerificationDigit = document.getElementById('code-verification-digit');
+        this.fieldCodeValue = document.getElementById('code-value');
+        this.fieldCodeCompanyId = document.getElementById('code-company-id');
+        this.fieldCodeFreeField = document.getElementById('code-free-field');
 
         this.sampleButton = document.getElementById('button-sample');
         this.sampleButton.addEventListener('click', () => this.loadSample());
+    }
+
+    onCodeChanged() {
+        if (!this.numericCodeComponent.isComplete()) {
+            this.resultDataElement.classList.add('hidden');
+            return;
+        }
+
+        const result = CodeInformation.parseCode(this.numericCodeComponent.getCode());
+
+        this.fieldCodeValidity.innerText = result !== null ? 'válido' : 'inválido';
+        if (result) {
+            this.fieldCodeCompanySegment.innerText = result.segment;
+            this.fieldCodeVerificationDigit.innerText = result.valueType;
+            this.fieldCodeErrorVerification.innerText =
+                (result.valueType === '6' || result.valueType === '7') ? '10' : '11';
+            this.fieldCodeValue.innerText = result.value;
+            this.fieldCodeCompanyId.innerText = result.companyId;
+            if (result.companyName) {
+                this.fieldCodeCompanyId.innerText += ' (' + result.companyName + ')';
+            }
+            this.fieldCodeFreeField.innerText = result.freeField;
+
+            for (const field of this.allResultFields) {
+                field.classList.remove('hidden');
+            }
+        } else {
+            for (const field of this.allResultFields) {
+                field.classList.add('hidden');
+            }
+            this.fieldCodeValidity.parentNode.classList.remove('hidden');
+        }
+
+        this.resultDataElement.classList.remove('hidden');
     }
 
     pause() {
@@ -137,14 +208,6 @@ class Boleto {
         }
 
         this.numericCodeComponent.setCode(sample);
-        const obj = CodeInformation.parseCode(this.numericCodeComponent.getCode());
-        console.info(obj.product);
-        console.info(obj.segment);
-        console.info(obj.valueType);
-        console.info(obj.errorCheckDigit);
-        console.info(obj.value);
-        console.info(obj.companyId);
-        console.info(obj.freeField);
     }
 }
 
