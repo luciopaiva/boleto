@@ -13,8 +13,8 @@ input {
 
 #mask {
     position: relative;
-    top: -23px;
-    left: 2px;
+    top: -27px;
+    left: 13px;
     z-index: -1;
     color: rgba(0,0,0,0.3);
 }
