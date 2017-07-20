@@ -6,24 +6,21 @@
 
     <link rel="stylesheet" href="bootstrap.min.css">
     <link rel="stylesheet" href="index.css">
-    <script src="index.js"></script>
+    <script src="index.js" defer></script>
 </head>
 <body>
 
 <div class="container">
     <div class="row">
-        <h1>-</h1>
+        <h1>Boleto</h1>
     </div>
 
     <div class="row">
-        <div class="col-md-6 col-md-offset-3">
-
-            <!-- code component -->
-            <form action="" class="form">
-                <label for="code"></label>
-                <input id="code" class="form-control">
-                <span id="mask">XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X</span>
-            </form>
+        <div class="col-md-12">
+            <div class="numeric-code-container">
+                <span id="numeric-mask">XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X</span>
+                <span id="numeric-code"></span><span class="blinking-cursor">▇</span>
+            </div>
         </div>
     </div>
 </div>

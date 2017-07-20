@@ -1,69 +1,73 @@
+"use strict";
 
 
-class NumericComponent {
+class NumericCode {
 
-    constructor (codeElementId, maskElementId) {
-        this.code = document.getElementById(codeElementId);
-        this.mask = document.getElementById(maskElementId);
+    constructor (elementId) {
+        this.numericCodeElement = document.getElementById(elementId);
+        document.addEventListener('keydown', this.onKeyDown.bind(this));
 
-        this.maskFull =  'XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X';
-        this.maskEmpty = '           -             -             -             - ';
-
-        this.code.value = '';
-        this.code.attributes['maxlength'] = this.maskFull.length;
-
-        this.allowedKeys = new Set('0,1,2,3,4,5,6,7,8,9,Backspace,Delete,ArrowLeft,ArrowRight,Home,End'.split(','));
-        this.movementKeys = new Set('ArrowLeft,ArrowRight,Home,End'.split(','));
-        this.code.addEventListener('keydown', this.checkKey.bind(this));
+        this.code = '';
+        this.allowedKeys = new Set('0,1,2,3,4,5,6,7,8,9,Backspace'.split(','));
     }
 
-    checkKey(event) {
-        // status before key is applied
-        const currentLength = this.code.value.length;
-        const currentCaret = this.code.selectionStart;
+    /**
+     * @private
+     * @param {KeyboardEvent} event
+     */
+    onKeyDown(event) {
+        if (this.allowedKeys.has(event.key)) {
+            this.processCodeKey(event.key);
+        }
+    }
 
-        // cancel event if either key is not allowed or field is full
-        if (!this.allowedKeys.has(event.key)) {
-            event.preventDefault();
-            return;
+    /**
+     * @private
+     * @return {string}
+     */
+    getCodeWithMask() {
+        let result = '';
+        let maskIndex = 0;
+        for (let codeDigit of this.code) {
+            result += codeDigit;
+            maskIndex++;
+            while (maskIndex < NumericCode.CODE_MASK.length) {
+                if (NumericCode.CODE_MASK[maskIndex] === 'X') {
+                    break;
+                }
+                result += NumericCode.CODE_MASK[maskIndex];
+                maskIndex++;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @private
+     * @param {string} key
+     */
+    processCodeKey(key) {
+        if (key === 'Backspace') {
+            if (this.code.length > 0) {
+                this.code = this.code.substr(0, this.code.length - 1);
+            }
+            // otherwise discard Backspace
+        } else if (this.code.length < NumericCode.CODE_SIZE_IN_DIGITS) {
+            this.code += key;
         }
 
-        // allow caret to move
-        if (this.movementKeys.has(event.key)) {
-            return;  // allow it, but stop here
-        }
-
-        // edge conditions
-        if ((event.key === 'Backspace' && currentCaret === 0) ||
-            (event.key === 'Delete' && currentCaret === currentLength)) {
-            event.preventDefault();
-            return;  // no effect
-        }
-
-        const selectionSize = this.code.selectionEnd - this.code.selectionStart;  // if any
-        const isDecreasingLength = event.key === 'Backspace' || event.key === 'Delete';
-
-        const howMuchToDecrease = selectionSize > 0 ? selectionSize : 1;
-        const howMuchToIncrease = selectionSize > 0 ? 1 - selectionSize : 1;
-        const newLength = currentLength + (isDecreasingLength ? -howMuchToDecrease : howMuchToIncrease);
-
-        // check if new length is greater than allowed
-        if (newLength > this.maskFull.length) {
-            event.preventDefault();
-            return;
-        }
-
-        // hide the part of the mask that is already filled
-        const currentMask = this.maskEmpty.substr(0, newLength) + this.maskFull.substr(newLength);
-        this.mask.innerHTML = currentMask.replace(/\s/g, '&nbsp;');
+        this.numericCodeElement.innerText = this.getCodeWithMask();
     }
 }
+
+NumericCode.CODE_SIZE_IN_DIGITS = 48;
+NumericCode.CODE_MASK = 'XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X';
 
 class Boleto {
 
     constructor () {
-        this.numericComponent = new NumericComponent('code', 'mask');
+        new NumericCode('numeric-code');
     }
 }
 
-window.addEventListener('load', () => new Boleto());
+new Boleto();
