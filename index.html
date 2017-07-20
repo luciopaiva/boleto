@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Código de Barras de Boletos e Convênios</title>
 
-    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="index.css">
     <script src="index.js" defer></script>
 </head>
@@ -26,26 +26,21 @@
                 <button id="button-sample" class="btn btn-sm btn-primary">clique aqui</button> para carregar um exemplo.
             </p>
             <div class="numeric-code-container">
-                <span id="numeric-mask">XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X</span>
-                <span id="numeric-code"></span><span class="blinking-cursor">▇</span>
-            </div>
-        </div>
-    </div>
+                <div class="input-group">
+                    <input class="form-control" readonly>
+                    <span class="input-group-btn">
+                    <button id="clear-button" class="btn btn-default" type="button">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+                </span>
+                </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <table class="table">
-                <tbody>
-                <tr>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                </tr>
-                </tbody>
-            </table>
+                <span id="numeric-mask">XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X</span>
+                <div id="numeric-code-and-cursor-container">
+                    <span id="numeric-code"></span><span class="blinking-cursor">▇</span>
+                </div>
+
+            </div>
         </div>
     </div>
 

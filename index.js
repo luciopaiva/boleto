@@ -1,12 +1,16 @@
 "use strict";
 
 
-class NumericCode {
+class NumericCodeComponent {
 
-    constructor (elementId) {
+    constructor (inputElementId, clearButtonElementId) {
+        this.numericCodeElement = document.getElementById(inputElementId);
+        this.clearButtonElement = document.getElementById(clearButtonElementId);
+
         this.isCodeValid = false;
-        this.numericCodeElement = document.getElementById(elementId);
         document.addEventListener('keydown', this.onKeyDown.bind(this));
+
+        this.clearButtonElement.addEventListener('click', () => this.setCode(''));
 
         this.allowedKeys = new Set('0,1,2,3,4,5,6,7,8,9,Backspace'.split(','));
         this.setCode('');
@@ -32,11 +36,11 @@ class NumericCode {
         for (let codeDigit of this.code) {
             result += codeDigit;
             maskIndex++;
-            while (maskIndex < NumericCode.CODE_MASK.length) {
-                if (NumericCode.CODE_MASK[maskIndex] === 'X') {
+            while (maskIndex < NumericCodeComponent.CODE_MASK.length) {
+                if (NumericCodeComponent.CODE_MASK[maskIndex] === 'X') {
                     break;
                 }
-                result += NumericCode.CODE_MASK[maskIndex];
+                result += NumericCodeComponent.CODE_MASK[maskIndex];
                 maskIndex++;
             }
         }
@@ -53,7 +57,7 @@ class NumericCode {
                 this.code = this.code.substr(0, this.code.length - 1);
             }
             // otherwise discard Backspace
-        } else if (this.code.length < NumericCode.CODE_SIZE_IN_DIGITS) {
+        } else if (this.code.length < NumericCodeComponent.CODE_SIZE_IN_DIGITS) {
             this.code += key;
         }
 
@@ -69,23 +73,30 @@ class NumericCode {
         this.numericCodeElement.innerText = this.getCodeWithMask();
     }
 
+    getCode() {
+        return this.code;
+    }
+
     validateCode() {
         // ToDo validate code
         this.isCodeValid = true;
         return this.isCodeValid;
     }
+}
 
-    analyze() {
-        if (!this.isCodeValid) {
-            return null;
-        }
+NumericCodeComponent.CODE_SIZE_IN_DIGITS = 48;
+NumericCodeComponent.CODE_MASK = 'XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X';
+
+class CodeInformation {
+
+    static parseCode(code) {
 
         // get rid of validation digits
         const strippedCode =
-            this.code.substr(0, 11) +
-            this.code.substr(12, 11) +
-            this.code.substr(24, 11) +
-            this.code.substr(36, 11);
+            code.substr(0, 11) +
+            code.substr(12, 11) +
+            code.substr(24, 11) +
+            code.substr(36, 11);
 
         const product = strippedCode[0];  // should be always "8"
         const segment = strippedCode[1];
@@ -103,13 +114,10 @@ class NumericCode {
     }
 }
 
-NumericCode.CODE_SIZE_IN_DIGITS = 48;
-NumericCode.CODE_MASK = 'XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X';
-
 class Boleto {
 
     constructor () {
-        this.numericCode = new NumericCode('numeric-code');
+        this.numericCodeComponent = new NumericCodeComponent('numeric-code', 'clear-button');
 
         this.sampleButton = document.getElementById('button-sample');
         this.sampleButton.addEventListener('click', () => this.loadSample());
@@ -121,12 +129,15 @@ class Boleto {
 
     async loadSample() {
         const sample = '846700000009699001090116033141666515101001037833';
+
+        // do animation
         for (let i = 1; i < sample.length; i++) {
-            this.numericCode.setCode(sample.slice(0, i));
+            this.numericCodeComponent.setCode(sample.slice(0, i));
             await this.pause();
         }
-        this.numericCode.setCode(sample);
-        const obj = this.numericCode.analyze();
+
+        this.numericCodeComponent.setCode(sample);
+        const obj = CodeInformation.parseCode(this.numericCodeComponent.getCode());
         console.info(obj.product);
         console.info(obj.segment);
         console.info(obj.valueType);

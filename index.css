@@ -1,7 +1,4 @@
 
-body {
-}
-
 @keyframes blink {
     from, to {
         color: transparent;
@@ -24,18 +21,43 @@ body {
 .numeric-code-container {
     margin-top: 30px;
     font-family: monospace;
-    font-size: 33px;
+    font-size: 31px;
     position: relative;
-    border: 1px solid black;
-    border-radius: 5px;
-    padding: 2px 2px 2px 20px;
+}
+
+.numeric-code-container .input-group {
+    z-index: 1;
+}
+
+.numeric-code-container .input-group input {
+    height: 50px;
+    background-color: white;
+}
+
+.numeric-code-container .input-group button {
+    height: 50px;
+    width: 50px;
+}
+
+.numeric-code-container .input-group .glyphicon {
+    font-size: 150%;
 }
 
 .blinking-cursor {
     position: relative;
-    top: -7px;
+    top: -6px;
     font-size: 90%;
     animation: 1s blink step-end infinite;
+}
+
+#numeric-code-and-cursor-container, #numeric-mask {
+    position: absolute;
+    top: 4px;
+    left: 20px;
+}
+
+#numeric-code-and-cursor-container {
+    z-index: 3;
 }
 
 #numeric-code {
@@ -44,8 +66,5 @@ body {
 
 #numeric-mask {
     color: lightgray;
-    position: absolute;
-    top: 2px;
-    left: 20px;
-    z-index: -1;
+    z-index: 2;
 }
