@@ -95,14 +95,79 @@ NumericCodeComponent.CODE_MASK = 'XXXXXXXXXXX-X XXXXXXXXXXX-X XXXXXXXXXXX-X XXXX
 
 class CodeInformation {
 
+    /**
+     * @param {string} code
+     * @return {boolean}
+     */
+    static validate(code) {
+        if (!code || code.length !== NumericCodeComponent.CODE_SIZE_IN_DIGITS) {
+            return false;
+        }
+
+        if (code[0] !== '8') {
+            return false;
+        }
+
+        const isModulus10 = code[2] === '6' || code[2] === '7';  // 8 and 9 are modulus 11
+        return isModulus10 ? CodeInformation.validateModulus10(code) : CodeInformation.validateModulus11(code);
+    }
+
+    static validateModulus10(code) {
+        const parts = CodeInformation.breakCodeParts(code);
+        const validationDigits = [code[11], code[23], code[35], code[47]];
+
+        CodeInformation.validateModulus10Part(parts[0], validationDigits[0]);
+        CodeInformation.validateModulus10Part(parts[1], validationDigits[1]);
+        CodeInformation.validateModulus10Part(parts[2], validationDigits[2]);
+        CodeInformation.validateModulus10Part(parts[3], validationDigits[3]);
+
+        return CodeInformation.validateModulus10Part(parts[0], validationDigits[0]) &&
+            CodeInformation.validateModulus10Part(parts[1], validationDigits[1]) &&
+            CodeInformation.validateModulus10Part(parts[2], validationDigits[2]) &&
+            CodeInformation.validateModulus10Part(parts[3], validationDigits[3]);
+    }
+
+    static validateModulus10Part(codePart, validationDigit) {
+        let resultingDigits = '';
+        for (let i = 0; i < codePart.length; i++) {
+            const multiplier = i % 2 === 0 ? 2 : 1;
+            resultingDigits += (parseInt(codePart[i], 10) * multiplier).toString();
+        }
+        const sum = resultingDigits.split('').map(d => parseInt(d, 10)).reduce((acc, val) => acc + val, 0);
+        const mod10 = sum % 10;
+        const result = mod10 === 0 ? 0 : 10 - mod10;
+
+        console.info(result.toString(), validationDigit.toString());
+        return result.toString() === validationDigit.toString();
+    }
+
+    static validateModulus11(code) {
+
+    }
+
+    /**
+     * Breaks code into 4 11-digit parts and gets rid of validation digits.
+     * @param code
+     * @return {[string, string, string, string]}
+     */
+    static breakCodeParts(code) {
+        return [code.substr(0, 11),
+            code.substr(12, 11),
+            code.substr(24, 11),
+            code.substr(36, 11)];
+    }
+
+    /**
+     * @param {string} code
+     */
     static parseCode(code) {
+        // invalid code yields null
+        if (!CodeInformation.validate(code)) {
+            return null;
+        }
 
         // get rid of validation digits
-        const strippedCode =
-            code.substr(0, 11) +
-            code.substr(12, 11) +
-            code.substr(24, 11) +
-            code.substr(36, 11);
+        const strippedCode = CodeInformation.breakCodeParts(code).join('');
 
         const product = strippedCode[0];  // should be always "8"
         const segmentDigit = strippedCode[1];
@@ -112,9 +177,9 @@ class CodeInformation {
         const value = (parseInt(strippedCode.substring(4, 15), 10) / 100).toFixed(2).replace('.', ',');
 
         const companyId = strippedCode.substring(15, 19);
+
         const companyName = CodeInformation.companyNameById.get(companyId);
         const freeField = strippedCode.substring(19, 44);
-
         // const cnpj = this.code.substring(15, 23);
         // const freeField = this.code.substring(23, 44);
 
@@ -199,7 +264,7 @@ class Boleto {
     }
 
     async loadSample() {
-        const sample = '846700000009699001090116033141666515101001037833';
+        const sample = Boleto.SAMPLE_CODE;
 
         // do animation
         for (let i = 1; i < sample.length; i++) {
@@ -210,5 +275,7 @@ class Boleto {
         this.numericCodeComponent.setCode(sample);
     }
 }
+
+Boleto.SAMPLE_CODE = '846700000009699001090116033141666515101001037833';
 
 new Boleto();
